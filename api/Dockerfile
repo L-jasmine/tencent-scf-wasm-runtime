@@ -12,7 +12,7 @@ RUN apt-get update && apt-get -y install curl
 COPY package*.json ./
 RUN npm install
 
-COPY image-classification-yml/src/models ./models
+COPY functions/image-classification-yml/src/models ./models
 
 # Bundle and pre-compile the wasm files
 COPY *.wasm ./
