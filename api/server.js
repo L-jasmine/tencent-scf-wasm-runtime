@@ -25,7 +25,7 @@ app.options('/func', (req, res) => {
 app.post('/func', (req, res) => {
   const wasmedge = spawn(
     path.join(__dirname, 'wasmedge-tensorflow'),
-    ['--dir .:.', path.join(__dirname, 'classify_yml.so'), path.join(__dirname, 'models/moblienet_v2/task.yml')],
+    ['--dir', '.:'+__dirname, path.join(__dirname, 'classify_yml.so'), './models/mobilenet_v2/task.yml'],
     {env: {'LD_LIBRARY_PATH': __dirname}}
   );
 
