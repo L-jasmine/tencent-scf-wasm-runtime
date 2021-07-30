@@ -35,7 +35,7 @@ Password:
 
 ## 建立我们的函数镜像
 
-在这个模板中，我们有一个已经编译好的 WebAssembly 函数放在 [api/classify.wasm](api/classify.wasm) 文件里。这个函数的 Rust 源代码在 [api/functions/image-classification](api/functions/image-classification) 里面。它读入一个图片，然后输出 AI 模型识别的这个图中的物体。
+在这个模板中，我们有一个已经编译好的 WebAssembly 函数放在 [api/classify.wasm](api/classify_yml.wasm) 文件里。这个函数的 Rust 源代码在 [api/functions/image-classification](api/functions/image-classification-yml) 里面。它读入一个图片，然后输出 AI 模型识别的这个图中的物体。
 
 而 [api/server.js](api/server.js) 这个脚本从 Web 函数的网关获得 HTTP request 的数据，传给 `classify.wasm` 函数执行，再把执行结果返回给 HTTP response。
 
@@ -84,7 +84,7 @@ The push refers to repository [hkccr.ccs.tencentyun.com/secondstate/classify]
 
 ## 开发你自己的函数
 
-我们的 WebAssembly serverless 函数是用 Rust 开发的。这个 Rust 项目在 [api/functions](api/functions) 里面。就用 `cargo` 命令就可以编译出 [api/classify.wasm](api/classify.wasm) 文件。
+我们的 WebAssembly serverless 函数是用 Rust 开发的。这个 Rust 项目在 [api/functions](api/functions) 里面。就用 `cargo` 命令就可以编译出 [api/classify.wasm](api/classify_yml.wasm) 文件。
 
 ```
 $ cd api/functions/image-classification/
@@ -92,11 +92,11 @@ $ cargo build --release --target wasm32-wasi
 $ cp target/wasm32-wasi/release/classify.wasm ../../
 ```
 
-这个 [Rust 函数](api/functions/image-classification/src/main.rs) 从 `STDIN` 读入上传的图片，然后把黑白图片从 `STDOUT` 输出。你可以把它改成你需要的业务逻辑。
+这个 [Rust 函数](api/functions/image-classification-yml/src/main.rs) 从 `STDIN` 读入上传的图片，然后把黑白图片从 `STDOUT` 输出。你可以把它改成你需要的业务逻辑。
 
 模板中的 [api/server.js](api/server.js) 将 HTTP request 与 response 与 wasmedge 联接起来。如果你改了 Rust 函数的输入与输出，你可能也要改动 [api/server.js](api/server.js) 里面的胶水代码。
 
-修改了 [Rust 项目](api/functions/image-classification/) 与 [api/server.js](api/server.js) 之后，你可以重新创建与部署 Docker 镜像。新的函数就可以用了！
+修改了 [Rust 项目](api/functions/image-classification-yml/) 与 [api/server.js](api/server.js) 之后，你可以重新创建与部署 Docker 镜像。新的函数就可以用了！
 
 ## 下一步
 

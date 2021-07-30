@@ -22,7 +22,7 @@ export default function Home() {
 
         <div className={styles.operating}>
           <div>
-            <input type="file" id="fileElem" accept="image/jpeg" className={styles['visually-hidden']} onChange={fileSelected} />
+            <input type="file" id="fileElem" accept="image/jpeg,image/png" className={styles['visually-hidden']} onChange={fileSelected} />
             <label htmlFor="fileElem" className={styles.noselect}>Select a photo</label>
             <button id="runBtn" onClick={runWasm} disabled={!enableWasm || loading}>{loading ? 'Loading' : 'Classify with Wasm'}</button>
           </div>
