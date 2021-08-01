@@ -21,7 +21,7 @@
 
 ![](docs/images/create_container_repo.png)
 
-在 `secondstate` 这个命名空间，新建一个镜像。我把它命名为 `classify`，因为我们这个示例函数的功能是把图片识别分类。
+在 `secondstate` 这个命名空间，新建一个镜像。我把它命名为 `classify_yml`，因为我们这个示例函数的功能是把图片识别分类。
 
 ![](docs/images/create_container_image.png)
 
@@ -35,24 +35,24 @@ Password:
 
 ## 建立我们的函数镜像
 
-在这个模板中，我们有一个已经编译好的 WebAssembly 函数放在 [api/classify.wasm](api/classify_yml.wasm) 文件里。这个函数的 Rust 源代码在 [api/functions/image-classification](api/functions/image-classification-yml) 里面。它读入一个图片，然后输出 AI 模型识别的这个图中的物体。
+在这个模板中，我们有一个已经编译好的 WebAssembly 函数放在 [api/classify_yml.wasm](api/classify_yml.wasm) 文件里。这个函数的 Rust 源代码在 [api/functions/image-classification-yml](api/functions/image-classification-yml) 里面。它读入一个图片，然后输出 AI 模型识别的这个图中的物体。
 
 而 [api/server.js](api/server.js) 这个脚本从 Web 函数的网关获得 HTTP request 的数据，传给 `classify.wasm` 函数执行，再把执行结果返回给 HTTP response。
 
-我们要把 `classify.wasm` 与 `server.js` 以及 WasmEdge 的执行环境一起封装在一个容器镜像里面，才能后续将其部署为 serverless 函数。
+我们要把 `classify_yml.wasm` 与 `server.js` 以及 WasmEdge 的执行环境一起封装在一个容器镜像里面，才能后续将其部署为 serverless 函数。
 
 ```
 $ cd api
-$ docker build -t hkccr.ccs.tencentyun.com/secondstate/classify:0.1 ./
+$ docker build -t hkccr.ccs.tencentyun.com/secondstate/classify-yml:0.1 ./
 ... ...
-Successfully tagged hkccr.ccs.tencentyun.com/secondstate/classify:0.1
+Successfully tagged hkccr.ccs.tencentyun.com/secondstate/classify-yml:0.1
 ```
 
 然后将这个容器镜像发布在我们刚刚建立的腾讯云容器镜像仓库里。
 
 ```
-$ docker push hkccr.ccs.tencentyun.com/secondstate/classify:0.1
-The push refers to repository [hkccr.ccs.tencentyun.com/secondstate/classify]
+$ docker push hkccr.ccs.tencentyun.com/secondstate/classify-yml:0.1
+The push refers to repository [hkccr.ccs.tencentyun.com/secondstate/classify-yml]
 ... ...
 0.1: digest: sha256:... size: 3246
 ```
@@ -92,7 +92,7 @@ $ cargo build --release --target wasm32-wasi
 $ cp target/wasm32-wasi/release/classify.wasm ../../
 ```
 
-这个 [Rust 函数](api/functions/image-classification-yml/src/main.rs) 从 `STDIN` 读入上传的图片，然后把黑白图片从 `STDOUT` 输出。你可以把它改成你需要的业务逻辑。
+这个 [Rust 函数](api/functions/image-classification-yml/src/main.rs) 使用 models 里面的 yml 配置文件来配置 model 相关参数， 从 `STDIN` 读入上传的图片，然后把识别结果从 `STDOUT` 输出。你可以把它改成你需要的业务逻辑。
 
 模板中的 [api/server.js](api/server.js) 将 HTTP request 与 response 与 wasmedge 联接起来。如果你改了 Rust 函数的输入与输出，你可能也要改动 [api/server.js](api/server.js) 里面的胶水代码。
 
@@ -104,3 +104,22 @@ $ cp target/wasm32-wasi/release/classify.wasm ../../
 
 另外，虽然 Rust 非常适合写高性能的 serverless 函数，很多 serverless 用户希望有“低代码”的解决方案。这里，我们可以为具体应用设计“低代码”语言（DSL or Domain Specific Language）。WebAssembly 对语言编译器与解释器的广泛支持，使其特别适合运行各行各业的 DSL。例子有我们正在为飞书设计的聊天机器人语言与人工智能推理语言。
 
+## 本地运行测试
+
+实话实说，由于种种原因，我只在本地运行成功了。下面是本地运行后端测试的步骤。
+
+### 第一步 build image
+```shell
+$ cd api
+$ docker build -t wasmedge/yml-demo .
+```
+
+### 第二步 run image
+```shell
+$ docker run -p 9000:9000 wasmedge/yml-demo
+```
+
+### 第三步 curl test
+```shell
+$ curl --request POST 'http://127.0.0.1:9000/func' --header 'image-type: image/png' --data-binary '@cowboy.png'
+```
